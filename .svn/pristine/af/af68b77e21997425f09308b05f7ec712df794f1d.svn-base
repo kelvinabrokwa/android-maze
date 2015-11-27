@@ -1,0 +1,49 @@
+package edu.wm.cs.cs301.kelvinabrokwa.falstad;
+
+import android.view.View;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.util.AttributeSet;
+
+public class GraphicsWrapper extends View {
+
+	private Canvas canvas;
+	private Paint paint;
+	private Bitmap bitmap;
+
+	public GraphicsWrapper(Context context, AttributeSet attrs) {
+		super(context, attrs);
+	}
+	
+	public GraphicsWrapper setGWCanvas() {
+        bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+		canvas = new Canvas(bitmap);
+		paint = new Paint();
+		return this;
+	}
+	
+	public GraphicsWrapper setColor(int color) {
+		paint.setColor(color);
+		return this;
+	}
+	
+	public GraphicsWrapper drawLine(int x1, int y1, int x2, int y2) {
+		canvas.drawLine(x1, y1, x2, y2, paint);
+		return this;
+	}
+	
+	public GraphicsWrapper fillOval() {
+		paint.setStyle(Paint.Style.FILL);
+		// TO DO
+		return this;
+	}
+	
+	public GraphicsWrapper fillPolygon() {
+		paint.setStyle(Paint.Style.FILL);
+		// TO DO
+		return this;
+	}
+	
+}

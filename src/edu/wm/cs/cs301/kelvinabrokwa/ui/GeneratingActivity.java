@@ -1,0 +1,179 @@
+package edu.wm.cs.cs301.kelvinabrokwa.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.*;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.*;
+
+@SuppressWarnings("deprecation")
+public class GeneratingActivity extends ActionBarActivity {
+	
+
+	final public static String MANUAL_DRIVER = "Manual Driver",
+					    	   CURIOUS_MOUSE = "Curious Mouse",
+					    	   WALL_FOLLOWER = "Wall Follower",
+					    	   WIZARD = "Wizard";
+	
+	final public static String DRIVER = "DRIVER",
+							   SHOW_MAZE_FROM_TOP = "SHOW_MAZE_FROM_TOP",
+							   SHOW_WAY_TO_EXIT = "SHOW_WAY_TO_EXIT",
+							   SHOW_VISIBLE_WALLS = "SHOW_VISIBLE_WALLS";
+
+	private MazeBuilder mazebuilder;
+	private int mazew, mazeh;
+	private int percentdone;
+	
+	private TextView progressBarTitle;
+	private ProgressBar progressBar;
+	private TextView progressText;
+	private TextView driverSpinnerTitle;
+	private Spinner driverSpinner;
+	private CheckBox showCurrentVisibleWalls;
+	private CheckBox showMazeFromTop;
+	private CheckBox showWayToExit;
+	private Button playButton;
+
+	private Handler handler = new Handler();
+	
+	int skill;
+	String algorithm;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_generating);
+	
+		Bundle extras = getIntent().getExtras();
+		skill = extras.getInt(AMazeActivity.SKILL);
+		algorithm = extras.getString(AMazeActivity.ALGORITHM);
+		
+		Globals.skill = skill;
+		
+		progressBarTitle = (TextView) findViewById(R.id.progress_bar_title);
+		progressBar = (ProgressBar) findViewById(R.id.generating_progress_bar);
+		progressText = (TextView) findViewById(R.id.progress_text_view);
+		driverSpinnerTitle = (TextView) findViewById(R.id.driver_spinner_title);
+		driverSpinner = (Spinner) findViewById(R.id.driver_spinner);
+		showCurrentVisibleWalls = (CheckBox) findViewById(R.id.visible_walls_checkbox);
+		showMazeFromTop = (CheckBox) findViewById(R.id.maze_top_checkbox);
+		showWayToExit = (CheckBox) findViewById(R.id.way_to_exit_checkbox);
+		playButton = (Button) findViewById(R.id.play_button);
+		
+		populateDriverSpinner();
+		build();
+	}
+	
+	/**
+	 * populate the driver type spinner
+	 */
+	public void populateDriverSpinner() {
+		List<String> options = new ArrayList<String>();
+		options.add(MANUAL_DRIVER);
+		options.add(CURIOUS_MOUSE);
+		options.add(WALL_FOLLOWER);
+		options.add(WIZARD);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_spinner_item, options);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		driverSpinner.setAdapter(adapter);
+	}
+
+	/**
+	 * display options to the user
+	 * called once loading is finished
+	 */
+	public void showOptions() {
+		progressBarTitle.setText("Maze Generation Complete");
+		driverSpinnerTitle.setVisibility(View.VISIBLE);
+		driverSpinner.setVisibility(View.VISIBLE);
+		showCurrentVisibleWalls.setVisibility(View.VISIBLE);
+		showMazeFromTop.setVisibility(View.VISIBLE);
+		showWayToExit.setVisibility(View.VISIBLE);
+		playButton.setVisibility(View.VISIBLE);
+	}
+
+	/**
+	 * back button on screen cancels build and moves to home screen
+	 * @param view
+	 */
+	public void moveToTitle(View view) {
+		Intent i = new Intent(this, AMazeActivity.class);
+		startActivity(i);
+	}
+	
+	/**
+	 * play button listener. starts play activity
+	 * @param view
+	 */
+	public void moveToPlayActivity(View view) {
+		Intent i = new Intent(this, PlayActivity.class);
+		i.putExtra(DRIVER, driverSpinner.getSelectedItem().toString());
+		i.putExtra(SHOW_MAZE_FROM_TOP, showMazeFromTop.isChecked());
+		i.putExtra(SHOW_WAY_TO_EXIT, showWayToExit.isChecked());
+		i.putExtra(SHOW_VISIBLE_WALLS, showCurrentVisibleWalls.isChecked());
+		startActivity(i);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.generating, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	public void build() {
+		mazebuilder = new MazeBuilder();
+		mazew = Constants.SKILL_X[skill];
+		mazeh = Constants.SKILL_Y[skill];
+		mazebuilder.build(this, mazew, mazeh, Constants.SKILL_ROOMS[skill], Constants.SKILL_PARTCT[skill]);
+	}
+	
+	public void newMaze(BSPNode root, Cells c, final Distance dists, int startx, int starty) {
+		handler.post(new Runnable() {
+			public void run() {
+				progressBar.setProgress(100);
+				progressText.setText(100 + "%");
+				showOptions();
+			}
+		});
+
+		Globals.maze = new Maze();
+		Globals.maze.newMaze(root, c, dists, startx, starty);
+	}
+	
+	public boolean increasePercentage(int pc) {
+		if (percentdone < pc &&  pc < 100) {
+			percentdone = pc;
+			handler.post(new Runnable() {
+				public void run() {
+					progressBar.setProgress(percentdone);
+					progressText.setText(percentdone + "%");
+				}
+			});
+			return true;
+		}
+		return false;
+	}
+}

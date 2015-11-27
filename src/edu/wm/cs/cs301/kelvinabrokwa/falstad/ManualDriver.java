@@ -1,0 +1,69 @@
+package edu.wm.cs.cs301.kelvinabrokwa.falstad;
+
+import android.util.Log;
+
+/**
+ * CRC Card for ManualDriver
+ * 
+ * Responsibilities of this class
+ * This class acts as a KeyListener and responds to all directional
+ * input during game play.
+ * 
+ * @author kelvinabrokwa
+ */
+
+public class ManualDriver implements RobotDriver {
+
+	Robot robot;
+	int width, height;
+	Distance dist;
+	
+	@Override
+	public void setRobot(Robot r) {
+		this.robot = r;
+	}
+
+	@Override
+	public void setDimensions(int w, int h) {
+		width = w;
+		height = h;
+	}
+
+	@Override
+	public void setDistance(Distance distance) {
+		dist = distance;
+	}
+
+	@Override
+	public boolean drive2Exit() throws Exception {
+		return false;
+	}
+
+	@Override
+	public float getEnergyConsumption() {
+		return 2500 - robot.getBatteryLevel();
+	}
+
+	@Override
+	public int getPathLength() {
+		return ((BasicRobot)robot).getPathLength();
+	}
+	
+	public void move() {
+		try {
+			robot.move(1);
+		} catch (Exception e) {
+			Log.v("Maze Exception", e.toString());
+			//((BasicRobot) robot).reset(true);
+		}
+	}
+	public void rotate(Robot.Turn t) {
+		try {
+			robot.rotate(t);
+		} catch (Exception e) {
+			Log.v("Maze Exception", e.toString());
+			//((BasicRobot) robot).reset(true);
+		}
+	}
+
+}

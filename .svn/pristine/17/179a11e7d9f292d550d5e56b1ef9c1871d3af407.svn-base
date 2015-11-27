@@ -1,0 +1,311 @@
+package edu.wm.cs.cs301.kelvinabrokwa.falstad;
+
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.GraphicsWrapper.GWEvent;
+import java.util.Arrays;
+import java.util.HashMap;
+
+/**
+ * CRC Card for BasicRobot
+ * 
+ * Responsibilities of this class
+ * 1. manipulate the player's position in the maze
+ *    - moves forward
+ *    - rotates 90 degrees
+ *    - rotates 180 degrees
+ * 2. track the number of moves made
+ * 3. track the amount of energy used
+ *    - 3 for 90 degree rotation
+ *    - 5 for movement
+ * 4. notify the maze the user has lost the game
+ * 5. provide its driver with path length and power usage information
+ * 6. resetting its internal information at the end of games to
+ *    replenish battery and reset path length to 0
+ * 
+ * It interaction with the Maze and ManualDriver
+ * In the maze it sets the state variable when the user has finished
+ * the game. It also sets fields that determine the message (congratulations or shame)
+ * of the final frame of the game
+ * 
+ * @author kelvinabrokwa
+ */
+public class BasicRobot implements Robot {
+
+	final int ENERGY_FOR_ROTATION = 3;
+	final int ENERGY_FOR_STEP = 5;
+	final float INITIAL_BATTERY_LEVEL = 2500;
+	float batteryLevel = INITIAL_BATTERY_LEVEL;
+	Maze maze;
+	int pathLength = 0;
+	boolean stopped = false;
+	
+	public final HashMap<Direction, int[]> dirs = new HashMap<Direction, int[]>();
+	private final HashMap<Direction, Integer> walls = new HashMap<Direction, Integer>();
+	
+	public BasicRobot() {
+		dirs.put(Direction.FORWARD, new int[] { 0, 1 });
+		dirs.put(Direction.BACKWARD, new int[] { 0, -1 });
+		dirs.put(Direction.RIGHT, new int[] { 1, 0 });
+		dirs.put(Direction.LEFT, new int[] { -1, 0 });
+		
+		walls.put(Direction.FORWARD, Constants.CW_BOT);
+		walls.put(Direction.BACKWARD, Constants.CW_TOP);
+		walls.put(Direction.RIGHT, Constants.CW_RIGHT);
+		walls.put(Direction.LEFT, Constants.CW_LEFT);
+	}
+
+	@Override
+	public void rotate(Turn turn) throws Exception {
+		if (((turn == Turn.LEFT || turn == Turn.RIGHT) && batteryLevel < ENERGY_FOR_ROTATION) ||
+				(turn == Turn.AROUND && batteryLevel < ENERGY_FOR_ROTATION * 2)) {
+			stopped = true;
+			reset(true);
+			throw new Exception("Not enough energy to rotate");
+		}
+
+		switch(turn) {
+		case LEFT:
+			maze.keyDown(GWEvent.LEFT);
+			batteryLevel -= ENERGY_FOR_ROTATION;
+			break;
+		case RIGHT:
+			maze.keyDown(GWEvent.RIGHT);
+			batteryLevel -= ENERGY_FOR_ROTATION;
+			break;
+		case AROUND:
+			maze.keyDown(GWEvent.LEFT);
+			maze.keyDown(GWEvent.LEFT);
+			batteryLevel -= ENERGY_FOR_ROTATION * 2;
+			break;
+		}
+		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
+		//maze.setPathLength(pathLength);
+	}
+
+	@Override
+	public void move(int distance) throws Exception {
+		batteryLevel++; // distanceToObstacle uses one energy
+		if (batteryLevel < ENERGY_FOR_STEP * distance) {
+			stopped = true;
+			reset(true);
+			throw new Exception("not enough energy to perform task");
+		}
+		if (distanceToObstacle(Direction.FORWARD) < distance) {
+			stopped = true;
+			reset(true);
+			throw new Exception("trying to walk through a wall");
+		}
+		pathLength += distance;
+		batteryLevel -= ENERGY_FOR_STEP * distance;
+		while (distance-- != 0)
+			maze.keyDown(GWEvent.UP);
+		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
+		//maze.setPathLength(pathLength);
+		if (isOutsideMaze())
+			reset(false);
+	}
+	
+	@Override
+	public int[] getCurrentPosition() throws Exception {
+		if (isOutsideMaze())
+			throw new Exception("current position is outside of the maze");
+		return new int[] { maze.px, maze.py };
+	}
+
+	@Override
+	public void setMaze(Maze m) {
+		maze = m;
+		//maze.setBatteryUsed(0);
+		//maze.setPathLength(0);
+	}
+
+	@Override
+	public boolean isAtGoal() {
+		int[] p = new int[2];
+		try {
+			p = getCurrentPosition();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return maze.mazecells.isExitPosition(p[0], p[1]);
+	}
+
+	@Override
+	public boolean canSeeGoal(Direction direction) throws UnsupportedOperationException {
+		if (!hasDistanceSensor(direction))
+			throw new UnsupportedOperationException();
+		batteryLevel++; // because distance to obstacle uses 1 energy
+		return distanceToObstacle(direction) == Integer.MAX_VALUE;
+	}
+
+	@Override
+	public boolean isInsideRoom() throws UnsupportedOperationException {
+		if (!hasRoomSensor())
+			throw new UnsupportedOperationException();
+		try {
+			int[] pos = this.getCurrentPosition();
+			return maze.mazecells.isInRoom(pos[0], pos[1]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	@Override
+	public boolean hasRoomSensor() {
+		return true;
+	}
+
+	@Override
+	public int[] getCurrentDirection() {
+		return new int[] { maze.dx, maze.dy };
+	}
+
+	@Override
+	public float getBatteryLevel() {
+		return batteryLevel;
+	}
+
+	@Override
+	public void setBatteryLevel(float level) {
+		this.batteryLevel = level;
+	}
+
+	@Override
+	public float getEnergyForFullRotation() {
+		return ENERGY_FOR_ROTATION * 4;
+	}
+
+	@Override
+	public float getEnergyForStepForward() {
+		return ENERGY_FOR_STEP;
+	}
+
+	@Override
+	public boolean hasStopped() {
+		return stopped;
+	}
+
+	@Override
+	public int distanceToObstacle(Direction direction) throws UnsupportedOperationException {
+		Direction absDir = normalizeDirection(direction);
+		int[] modDir = dirs.get(absDir);
+		int wallToCheck = walls.get(absDir);
+		int[] currPos = new int[2];
+		try { 
+			currPos = getCurrentPosition();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		boolean hitWall = false;
+		int dist = 0;
+		while (!hitWall) {
+			if (currPos[0] < 0 || currPos[0] >= maze.mazew || currPos[1] < 0 || currPos[1] >= maze.mazeh) {
+				return Integer.MAX_VALUE;
+			}
+			hitWall = (maze.mazecells.getValueOfCell(currPos[0], currPos[1]) & wallToCheck) != 0;
+			currPos[0] += modDir[0];
+			currPos[1] += modDir[1];
+			if (!hitWall)
+				dist++;
+		}
+		batteryLevel -= 1;
+		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
+		return dist;
+	}
+	
+	/**
+	 * convert a direction relative to the robot to direction relative to the maze
+	 * @param relDir - direction from the perspective of the robot
+	 * @return absolute direction with respect to the maze
+	 */
+	public Direction normalizeDirection(Direction relDir) {
+		int[] currDir = getCurrentDirection(); // direction the robot is facing
+		Direction absDir = null; // direction in which to sense
+		switch (relDir) {
+		case LEFT:
+			if (Arrays.equals(currDir, dirs.get(Direction.RIGHT))) // facing right
+				absDir = Direction.FORWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.LEFT))) // facing left
+				absDir = Direction.BACKWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.FORWARD))) // facing forward
+				absDir = Direction.LEFT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.BACKWARD))) // facing backward
+				absDir = Direction.RIGHT;
+			break;
+		case RIGHT:
+			if (Arrays.equals(currDir, dirs.get(Direction.RIGHT))) // facing right
+				absDir = Direction.BACKWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.LEFT))) // facing left
+				absDir = Direction.FORWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.FORWARD))) // facing forward
+				absDir = Direction.RIGHT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.BACKWARD))) // facing backward
+				absDir = Direction.LEFT;
+			break;
+		case FORWARD:
+			if (Arrays.equals(currDir, dirs.get(Direction.RIGHT))) // facing right
+				absDir = Direction.RIGHT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.LEFT))) // facing left
+				absDir = Direction.LEFT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.FORWARD))) // facing forward
+				absDir = Direction.FORWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.BACKWARD))) // facing backward
+				absDir = Direction.BACKWARD;
+			break;
+		case BACKWARD:
+			if (Arrays.equals(currDir, dirs.get(Direction.RIGHT))) // facing right
+				absDir = Direction.LEFT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.LEFT))) // facing left
+				absDir = Direction.RIGHT;
+			else if (Arrays.equals(currDir, dirs.get(Direction.FORWARD))) // facing forward
+				absDir = Direction.BACKWARD;
+			else if (Arrays.equals(currDir, dirs.get(Direction.BACKWARD))) // facing backward
+				absDir = Direction.FORWARD;
+			break;
+		}
+		return absDir;
+	}
+
+	@Override
+	public boolean hasDistanceSensor(Direction direction) {
+		return true;
+	}
+	
+	/**
+	 * Get the number of steps taken so far
+	 * @return number of steps taken
+	 */
+	public int getPathLength() {
+		return pathLength;
+	}
+	
+	/**
+	 * Tells if current position is outside the bounds of the maze
+	 * @return true if current position is outside the bounds of the maze else false
+	 */
+	public boolean isOutsideMaze() {
+		return maze.px < 0 || maze.px >= maze.mazew || maze.py < 0 || maze.py >= maze.mazeh;
+	}
+	
+	public boolean isOutsideMaze(int[] pos) {
+		return pos[0] < 0 || pos[0] >= maze.mazew || pos[1] < 0 || pos[1] >= maze.mazeh;
+	}
+	
+	/**
+	 * This method is called at the end of every game. It resets the internals of the robot
+	 * and tells the maze what information to add final screen.
+	 * @param lost - whether or not the player lost
+	 */
+	public void reset(boolean lost) {
+		//if (lost) maze.setSuccess(false);
+		//maze.setState(Constants.STATE_FINISH); // end the game
+	}
+	
+	/**
+	 * @return Maze
+	 */
+	public Maze getMaze() {
+		return maze;
+	}
+
+}

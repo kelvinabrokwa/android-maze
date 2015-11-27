@@ -1,0 +1,253 @@
+package edu.wm.cs.cs301.kelvinabrokwa.falstad;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import android.util.Log;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.Constants;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.Viewer;
+import edu.wm.cs.cs301.kelvinabrokwa.ui.Globals;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.Cells;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.GraphicsWrapper.GWEvent;
+
+public class Maze {
+	
+	final private ArrayList<Viewer> views = new ArrayList<Viewer>();
+	GraphicsWrapper gw;
+	Cells mazecells, seencells;
+	Distance mazedists;
+	BSPNode rootnode;
+	RangeSet rset;
+	boolean showMaze, showSolution, solving, mapMode;
+	int mazew, mazeh,
+		viewx, viewy, angle,
+		dx, dy,
+		px, py,
+		viewdx, viewdy,
+		walkStep;
+	
+	public void init() {
+		rset = new RangeSet();
+		notifyViewerRedraw();
+	}
+
+	public void newMaze(BSPNode root, Cells c, Distance dists, int startx, int starty) {
+		if (Cells.deepdebugWall) {
+			c.saveLogFile(Cells.deepedebugWallFileName);
+		}
+		
+		mazew = Constants.SKILL_X[Globals.skill];
+		mazeh = Constants.SKILL_Y[Globals.skill];
+		mazecells = c;
+		mazedists = dists;
+		seencells = new Cells(mazew + 1, mazeh + 1);
+		rootnode = root;
+		setCurrentDirection(1, 0) ;
+		setCurrentPosition(startx,starty) ;
+		walkStep = 0;
+		viewdx = dx<<16; 
+		viewdy = dy<<16;
+		angle = 0;
+		cleanViews();
+		addView(new FirstPersonDrawer(Constants.VIEW_WIDTH,
+									  Constants.VIEW_HEIGHT,
+									  Constants.MAP_UNIT,
+									  Constants.STEP_SIZE,
+									  mazecells,
+									  seencells,
+									  10,
+									  mazedists.getDists(),
+									  mazew,
+									  mazeh,
+									  root,
+									  this));
+		// order of registration matters, code executed in order of appearance!
+		addView(new MapDrawer(Constants.VIEW_WIDTH,
+							  Constants.VIEW_HEIGHT,
+							  Constants.MAP_UNIT,
+							  Constants.STEP_SIZE,
+							  mazecells,
+							  seencells,
+							  10,
+							  mazedists.getDists(),
+							  mazew,
+							  mazeh,
+							  this));
+	}
+	
+	private void setCurrentPosition(int x, int y) {
+		px = x;
+		py = y;
+	}
+		
+	private void setCurrentDirection(int x, int y) {
+		dx = x;
+		dy = y;
+	}
+	
+	public void addView(Viewer view) {
+		views.add(view);
+	}
+
+	public void removeView(Viewer view) {
+		views.remove(view) ;
+	}
+
+	private void cleanViews() {
+		// go through views and notify each one
+		Iterator<Viewer> it = views.iterator();
+		while (it.hasNext()) {
+			Viewer v = it.next();
+			if ((v instanceof FirstPersonDrawer) || (v instanceof MapDrawer)) {
+				it.remove();
+			}
+		}
+	}
+
+	private void notifyViewerRedraw() {
+		// go through views and notify each one
+		Iterator<Viewer> it = views.iterator();
+		while (it.hasNext())
+		{
+			Viewer v = it.next();
+            v.redraw(Globals.gw,
+            		 px,
+            		 py,
+            		 viewdx,
+            		 viewdy,
+            		 walkStep,
+            		 Constants.VIEW_OFFSET,
+            		 rset,
+            		 angle);
+		}
+		// update the screen with the buffer graphics
+		//panel.update() ;
+	}
+
+	synchronized private void walk(int dir) {
+		if (!checkMove(dir))
+			return;
+		for (int step = 0; step != 4; step++) {
+			walkStep += dir;
+			moveStep();
+		}
+		walkFinish(dir);
+	}
+
+	synchronized private void rotate(int dir) {
+		final int originalAngle = angle;
+		final int steps = 4;
+
+		for (int i = 0; i != steps; i++) {
+			angle = originalAngle + dir*(90*(i+1))/steps;
+			rotateStep();
+		}
+		rotateFinish();
+	}
+	
+	/**
+	 * Helper method for walk()
+	 * @param dir
+	 * @return true if there is no wall in this direction
+	 */
+	private boolean checkMove(int dir) {
+		// obtain appropriate index for direction (CW_BOT, CW_TOP ...) 
+		// for given direction parameter
+		int a = angle/90;
+		if (dir == -1)
+			a = (a+2) & 3; // TODO: check why this works
+		// check if cell has walls in this direction
+		// returns true if there are no walls in this direction
+		return mazecells.hasMaskedBitsFalse(px, py, Constants.MASKS[a]) ;
+	}
+	
+	private void rotateStep() {
+		angle = (angle+1800) % 360;
+		viewdx = (int) (Math.cos(radify(angle))*(1<<16));
+		viewdy = (int) (Math.sin(radify(angle))*(1<<16));
+		moveStep();
+	}
+
+	@SuppressWarnings("static-access")
+	private void moveStep() {
+		notifyViewerRedraw() ;
+		try {
+			Thread.currentThread().sleep(25);
+		} catch (Exception e) { }
+	}
+
+	private void rotateFinish() {
+		setCurrentDirection((int) Math.cos(radify(angle)), (int) Math.sin(radify(angle))) ;
+		//logPosition();
+	}
+
+	private void walkFinish(int dir) {
+		setCurrentPosition(px + dir*dx, py + dir*dy) ;
+		
+		if (isEndPosition(px,py)) {
+			//state = Constants.STATE_FINISH;
+			notifyViewerRedraw() ;
+		}
+		walkStep = 0;
+		//logPosition();
+	}
+	
+	public boolean keyDown(GWEvent e) {
+		switch (e) {
+		case LEFT:
+			rotate(1);
+			break;
+		case RIGHT:
+			rotate(-1);
+			break;
+		case UP:
+			walk(1);
+			break;
+		case DOWN:
+			walk(-1);
+			break;
+		}
+		notifyViewerRedraw();
+		return true;
+	}
+	
+	/**
+	 * checks if the given position is outside the maze
+	 * @param x
+	 * @param y
+	 * @return true if position is outside, false otherwise
+	 */
+	private boolean isEndPosition(int x, int y) {
+		return x < 0 || y < 0 || x >= mazew || y >= mazeh;
+	}
+
+	// map overlay getters and setters
+	public Maze setMapMode(boolean m) {
+		mapMode = m;
+		notifyViewerRedraw();
+		return this;
+	}
+	public Maze setShowMazeMode(boolean m) {
+		showMaze = m;
+		notifyViewerRedraw();
+		return this;
+	}
+	public Maze setShowSolutionMode(boolean m) {
+		showSolution = m;
+		notifyViewerRedraw();
+		return this;
+	}
+	boolean isInMapMode() { 
+		return mapMode; 
+	}
+	boolean isInShowMazeMode() { 
+		return showMaze; 
+	}
+	boolean isInShowSolutionMode() { 
+		return showSolution; 
+	}
+
+	final double radify(int x) {
+		return x * Math.PI / 180;
+	}
+}

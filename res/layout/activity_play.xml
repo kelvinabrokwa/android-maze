@@ -1,0 +1,77 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="edu.wm.cs.cs301.kelvinabrokwa.ui.PlayActivity" >
+
+    <edu.wm.cs.cs301.kelvinabrokwa.falstad.GraphicsWrapper
+        android:id="@+id/graphics_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ProgressBar
+        android:id="@+id/energy_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+    <Button
+        android:id="@+id/forward_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/right_button"
+        android:layout_centerHorizontal="true"
+        android:onClick="onForward"
+        android:text="⇧"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/backwards_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/forward_button"
+        android:layout_alignParentBottom="true"
+        android:onClick="onBackward"
+        android:text="⇩"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/right_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/backwards_button"
+        android:layout_alignLeft="@+id/backwards_button"
+        android:layout_marginLeft="54dp"
+        android:onClick="onRight"
+        android:text="⇨"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/left_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/forward_button"
+        android:layout_below="@+id/forward_button"
+        android:layout_marginRight="56dp"
+        android:onClick="onLeft"
+        android:text="⇦"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/pause_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/backwards_button"
+        android:layout_alignBottom="@+id/backwards_button"
+        android:layout_alignRight="@+id/energy_progress_bar"
+        android:onClick="onPause"
+        android:text="Pause"
+        android:visibility="invisible" />
+
+</RelativeLayout>

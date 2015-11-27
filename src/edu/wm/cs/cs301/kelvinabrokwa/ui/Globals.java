@@ -1,0 +1,15 @@
+package edu.wm.cs.cs301.kelvinabrokwa.ui;
+
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.*;
+
+public class Globals {
+	public static Maze maze;
+	public static Cells cells;
+	public static BSPNode root;
+	public static Distance dists;
+	public static int startx;
+	public static int starty;
+	public static GraphicsWrapper gw;
+	public static int skill;
+
+}

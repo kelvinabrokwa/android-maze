@@ -1,0 +1,130 @@
+package edu.wm.cs.cs301.kelvinabrokwa.ui;
+
+import android.support.v7.app.ActionBarActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.*;
+
+public class GeneratingActivity extends ActionBarActivity {
+	
+	final public static String MANUAL_DRIVER = "Manual Driver",
+					    	   CURIOUS_MOUSE = "Curious Mouse",
+					    	   WALL_FOLLOWER = "Wall Follower",
+					    	   WIZARD = "Wizard";
+	
+	private ProgressBar progressBar;
+	private TextView progressText;
+	private int progressStatus = 0;
+	private Handler handler = new Handler();
+	private TextView driverSpinnerTitle;
+	private Spinner driverSpinner;
+	private CheckBox showCurrentVisibleWalls;
+	private CheckBox showMazeFromTop;
+	private CheckBox showWayToExit;
+	private Button playButton;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_generating);
+		
+		progressBar = (ProgressBar) findViewById(R.id.generating_progress_bar);
+		progressText = (TextView) findViewById(R.id.progress_text_view);
+		driverSpinnerTitle = (TextView) findViewById(R.id.driver_spinner_title);
+		driverSpinner = (Spinner) findViewById(R.id.driver_spinner);
+		showCurrentVisibleWalls = (CheckBox) findViewById(R.id.visible_walls_checkbox);
+		showMazeFromTop = (CheckBox) findViewById(R.id.maze_top_checkbox);
+		showWayToExit = (CheckBox) findViewById(R.id.way_to_exit_checkbox);
+		playButton = (Button) findViewById(R.id.play_button);
+
+		populateDriverSpinner();
+		startProgressBar();
+	}
+	
+	public void populateDriverSpinner() {
+		List<String> options = new ArrayList<String>();
+		options.add(MANUAL_DRIVER);
+		options.add(CURIOUS_MOUSE);
+		options.add(WALL_FOLLOWER);
+		options.add(WIZARD);
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, options);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		driverSpinner.setAdapter(adapter);
+	}
+
+	public void startProgressBar() {
+		new Thread(new Runnable() {
+			public void run() {
+				while (progressStatus < 100) {
+					progressStatus++;
+					handler.post(new Runnable() {
+						public void run() {
+							progressBar.setProgress(progressStatus);
+							progressText.setText(progressStatus + "/" + progressBar.getMax());
+						}
+					});
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						showOptions();
+					}
+				});
+			}
+		}).start();
+	}
+	
+	public void showOptions() {
+		progressBar.setVisibility(View.INVISIBLE);
+		progressText.setVisibility(View.INVISIBLE);
+
+		driverSpinnerTitle.setVisibility(View.VISIBLE);
+		driverSpinner.setVisibility(View.VISIBLE);
+		showCurrentVisibleWalls.setVisibility(View.VISIBLE);
+		showMazeFromTop.setVisibility(View.VISIBLE);
+		showWayToExit.setVisibility(View.VISIBLE);
+		playButton.setVisibility(View.VISIBLE);
+	}
+
+	public void moveToTitle(View view) {
+		Intent i = new Intent(this, AMazeActivity.class);
+		startActivity(i);
+	}
+	
+	public void moveToPlayActivity() {
+		Intent i = new Intent(this, PlayActivity.class);
+		startActivity(i);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.generating, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+}

@@ -1,0 +1,196 @@
+package edu.wm.cs.cs301.kelvinabrokwa.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.*;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.*;
+import edu.wm.cs.cs301.kelvinabrokwa.falstad.Robot.Turn;
+
+@SuppressWarnings("deprecation")
+public class PlayActivity extends ActionBarActivity {
+
+	public final static String WON = "WON",
+							   REASON = "REASON";
+
+	private ProgressBar energyProgressBar;
+	private Button forward, backward, left, right, pause;
+	private Maze maze;
+	private Boolean showMap, showSolution, showVisibleWalls;
+	private String driverChoice;
+	private Robot robot;
+	private RobotDriver driver;
+	private boolean paused = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_play);
+
+		// activity view
+		forward = (Button) findViewById(R.id.forward_button);
+		backward = (Button) findViewById(R.id.backwards_button);
+		left = (Button) findViewById(R.id.left_button);
+		right = (Button) findViewById(R.id.right_button);
+		pause = (Button) findViewById(R.id.pause_button);
+
+		energyProgressBar = (ProgressBar) findViewById(R.id.energy_progress_bar);
+		energyProgressBar.setMax(2500);
+		setEnergy(2500);
+	
+		Bundle extras = getIntent().getExtras();
+		showMap = extras.getBoolean(GeneratingActivity.SHOW_MAZE_FROM_TOP);
+		showSolution = extras.getBoolean(GeneratingActivity.SHOW_WAY_TO_EXIT);
+		showVisibleWalls = extras.getBoolean(GeneratingActivity.SHOW_VISIBLE_WALLS);
+		driverChoice = extras.getString(GeneratingActivity.DRIVER);
+	
+		Globals.gw = (GraphicsWrapper) findViewById(R.id.graphics_wrapper);
+		maze = Globals.maze;
+		maze.init();
+		maze.setMapMode(showMap)
+			.setShowMazeMode(showVisibleWalls)
+			.setShowSolutionMode(showSolution);
+
+		showButton();
+	}
+	
+	/**
+	 * display either control buttons or a pause button based on the driver type
+	 */
+	public void showButton() {
+		if (driverChoice.equals(GeneratingActivity.MANUAL_DRIVER)) {
+			driver = new ManualDriver();
+			// show controls
+			forward.setVisibility(View.VISIBLE);
+			backward.setVisibility(View.VISIBLE);
+			left.setVisibility(View.VISIBLE);
+			right.setVisibility(View.VISIBLE);
+		} else {
+			if (driverChoice.equals(GeneratingActivity.CURIOUS_MOUSE))
+				driver = new CuriousMouse();
+			else if (driverChoice.equals(GeneratingActivity.WIZARD)) {
+				driver = new Wizard();
+				driver.setDistance(Globals.dists);
+			}
+			else if (driverChoice.equals(GeneratingActivity.WALL_FOLLOWER))
+				driver = new WallFollower();
+			// show play/pause button
+			pause.setVisibility(View.VISIBLE);
+		}
+		robot = new BasicRobot();
+		((BasicRobot) robot).setPlayActivity(this);
+		robot.setMaze(maze);
+		driver.setRobot(robot);
+		try {
+			driver.drive2Exit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * update the energy progress bar
+	 * @param energy
+	 */
+	public void setEnergy(int energy) {
+		energyProgressBar.setProgress(energy);
+	}
+	
+	/**
+	 * forward button press listener
+	 * @param v
+	 */
+	public void onForward(View v) {
+		((ManualDriver) driver).move();
+	}
+	/**
+	 * backwards button press listener
+	 * @param v
+	 */
+	public void onBackward(View v) {
+		((ManualDriver) driver).rotate(Turn.AROUND);
+		((ManualDriver) driver).move();
+	}
+	/**
+	 * left button press listener
+	 * @param v
+	 */
+	public void onLeft(View v) {
+		((ManualDriver) driver).rotate(Turn.LEFT);
+	}
+	/**
+	 * right button press listener
+	 * @param v
+	 */
+	public void onRight(View v) {
+		((ManualDriver) driver).rotate(Turn.RIGHT);
+	}
+	/**
+	 * pause button press listener
+	 * @param v
+	 */
+	public void onPause(View v) {
+		pause.setText((paused = !paused) ? "Play" : "Pause");
+	}
+	/**
+	 * back button leads to initial activity
+	 */
+	public void onBackPressed() {
+		Intent i = new Intent(this, AMazeActivity.class);
+		startActivity(i);
+	}
+	public void end(int pathLength, int batteryUsed) {
+		win();
+	}
+	public void end(int pathLength, int batteryUsed, String reason) {
+		lose(reason);
+	}
+	public void win() {
+		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(WON, true);
+		i.putExtra(REASON, "");
+		startActivity(i);
+	}
+	public void lose(String reason) {
+		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(WON, false);
+		i.putExtra(REASON, reason);
+		startActivity(i);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.play, menu);
+		menu.findItem(R.id.show_maze_item).setChecked(showMap);
+		menu.findItem(R.id.show_solution_item).setChecked(showSolution);
+		menu.findItem(R.id.show_visible_walls_item).setChecked(showVisibleWalls);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		
+		item.setChecked(!item.isChecked());
+
+		if (item.toString().equals("Show Map"))
+			maze.setMapMode(item.isChecked());
+		else if (item.toString().equals("Show Solution"))
+			maze.setShowSolutionMode(item.isChecked());
+		else if (item.toString().equals("Show Visible Walls"))
+			maze.setShowMazeMode(item.isChecked());
+
+		return super.onOptionsItemSelected(item);
+	}
+}

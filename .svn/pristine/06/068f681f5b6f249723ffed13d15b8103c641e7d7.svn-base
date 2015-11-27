@@ -1,0 +1,126 @@
+package edu.wm.cs.cs301.kelvinabrokwa.ui;
+
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.*;
+
+public class PlayActivity extends ActionBarActivity {
+
+	public final static String WON = "WON";
+
+	private ProgressBar energyProgressBar;
+	private Button forward, backward, left, right, pause;
+
+	private Boolean showMap,
+				    showSolution,
+				    showVisibleWalls;
+	
+	private String driver;
+	
+	private boolean paused = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_play);
+
+		// activity view
+		forward = (Button) findViewById(R.id.forward_button);
+		backward = (Button) findViewById(R.id.backwards_button);
+		left = (Button) findViewById(R.id.left_button);
+		right = (Button) findViewById(R.id.right_button);
+		pause = (Button) findViewById(R.id.pause_button);
+
+		energyProgressBar = (ProgressBar) findViewById(R.id.energy_progress_bar);
+		energyProgressBar.setMax(2500);
+		setEnergy(2500);
+	
+		Bundle extras = getIntent().getExtras();
+		showMap = extras.getBoolean(GeneratingActivity.SHOW_MAZE_FROM_TOP);
+		showSolution = extras.getBoolean(GeneratingActivity.SHOW_WAY_TO_EXIT);
+		showVisibleWalls = extras.getBoolean(GeneratingActivity.SHOW_VISIBLE_WALLS);
+		driver = extras.getString(GeneratingActivity.DRIVER);
+	
+		showButton();
+	
+		// log intent data
+		Log.v("Map", "Show map: " + Boolean.toString(showMap));
+		Log.v("Map", "Show solution: " + Boolean.toString(showSolution));
+		Log.v("Map", "Show visible walls: " + Boolean.toString(showVisibleWalls));
+	}
+	
+	public void showButton() {
+		if (driver.equals(GeneratingActivity.MANUAL_DRIVER)) {
+			forward.setVisibility(View.VISIBLE);
+			backward.setVisibility(View.VISIBLE);
+			left.setVisibility(View.VISIBLE);
+			right.setVisibility(View.VISIBLE);
+		} else {
+			pause.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void setEnergy(int energy) {
+		energyProgressBar.setProgress(energy);
+	}
+	
+	public void onForward(View v) {
+		Log.v("Control", "Forward");
+	}
+	public void onBackward(View v) {
+		Log.v("Control", "Backward");
+	}
+	public void onLeft(View v) {
+		Log.v("Control", "Left");
+	}
+	public void onRight(View v) {
+		Log.v("Control", "Right");
+	}
+	public void onPause(View v) {
+		pause.setText((paused = !paused) ? "Play" : "Pause");
+		Log.v("Robot Driver", "clicked pause");
+	}
+	
+	public void onBackPressed() {
+		Intent i = new Intent(this, AMazeActivity.class);
+		startActivity(i);
+	}
+	
+	public void win(View v) {
+		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(WON, true);
+		startActivity(i);
+	}
+	public void lose(View v) {
+		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(WON, false);
+		startActivity(i);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.play, menu);
+		menu.findItem(R.id.show_maze_item).setChecked(showMap);
+		menu.findItem(R.id.show_solution_item).setChecked(showSolution);
+		menu.findItem(R.id.show_visible_walls_item).setChecked(showVisibleWalls);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+}
