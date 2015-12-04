@@ -1999,12 +1999,10 @@ containing a value of this type.
         public static final int abc_textfield_search_activated_mtrl_alpha=0x7f020042;
         public static final int abc_textfield_search_default_mtrl_alpha=0x7f020043;
         public static final int abc_textfield_search_material=0x7f020044;
-        public static final int dora_maar_au_chat=0x7f020045;
-        public static final int girl_before_mirror=0x7f020046;
-        public static final int ic_launcher=0x7f020047;
-        public static final int les_demoiselles_davignon=0x7f020048;
-        public static final int notification_template_icon_bg=0x7f02004a;
-        public static final int weeping_woman_with_handkerchief=0x7f020049;
+        public static final int girl_before_mirror=0x7f020045;
+        public static final int ic_launcher=0x7f020046;
+        public static final int notification_template_icon_bg=0x7f020048;
+        public static final int weeping_woman_with_handkerchief=0x7f020047;
     }
     public static final class id {
         public static final int action0=0x7f09006f;
@@ -2045,13 +2043,13 @@ containing a value of this type.
         public static final int edit_query=0x7f090043;
         public static final int end=0x7f09001f;
         public static final int end_padder=0x7f09007b;
-        public static final int energy_progress_bar=0x7f090069;
+        public static final int energy_progress_bar=0x7f09006a;
         public static final int energy_used=0x7f09005b;
         public static final int expand_activities_button=0x7f090025;
         public static final int expanded_menu=0x7f090038;
-        public static final int forward_button=0x7f09006a;
+        public static final int forward_button=0x7f09006b;
         public static final int generating_progress_bar=0x7f09005e;
-        public static final int graphics_wrapper=0x7f09006e;
+        public static final int graphics_wrapper=0x7f090069;
         public static final int home=0x7f090000;
         public static final int homeAsUp=0x7f09000e;
         public static final int icon=0x7f090029;
@@ -2059,7 +2057,7 @@ containing a value of this type.
         public static final int image=0x7f090026;
         public static final int info=0x7f09007a;
         public static final int instructions=0x7f09005c;
-        public static final int left_button=0x7f09006c;
+        public static final int left_button=0x7f09006d;
         public static final int line1=0x7f090074;
         public static final int line3=0x7f090078;
         public static final int linearLayout1=0x7f090057;
@@ -2077,14 +2075,14 @@ containing a value of this type.
         public static final int normal=0x7f09000b;
         public static final int parentPanel=0x7f09002d;
         public static final int path_length=0x7f09005a;
-        public static final int pause_button=0x7f09006d;
+        public static final int pause_button=0x7f09006e;
         public static final int play_button=0x7f09005f;
         public static final int progress_bar_title=0x7f090062;
         public static final int progress_circular=0x7f090007;
         public static final int progress_horizontal=0x7f090008;
         public static final int progress_text_view=0x7f090061;
         public static final int radio=0x7f09003b;
-        public static final int right_button=0x7f09006b;
+        public static final int right_button=0x7f09006c;
         public static final int save_button=0x7f09005d;
         public static final int screen=0x7f090015;
         public static final int scrollIndicatorDown=0x7f090035;

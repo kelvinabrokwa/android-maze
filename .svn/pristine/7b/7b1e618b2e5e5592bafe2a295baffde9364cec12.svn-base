@@ -139,7 +139,7 @@ public class MazeFileWriter {
 		MazeFileWriter.appendChild(doc, mazeXML, "roomNum", rooms) ;                 // TODO: check, unclear if this is truly necessary
 		MazeFileWriter.appendChild(doc, mazeXML, "partiters", expected_partiters) ;  // TODO: check, unclear if this is truly necessary
 		// cells
-		int number = 0 ;
+		int number = 0 ;		
 		for ( int x = 0; x != width; x++) {
 			for ( int y = 0; y != height; y++) {
 				MazeFileWriter.appendChild(doc, mazeXML, "cell"+ "_" + Integer.toString(number), cells.getValueOfCell(x, y)) ;
@@ -147,7 +147,7 @@ public class MazeFileWriter {
 			}
 		}
 		// distances
-		number = 0 ;
+		number = 0 ;		
 		for ( int x = 0; x != width; x++) {
 			for ( int y = 0; y != height; y++) {
 				MazeFileWriter.appendChild(doc, mazeXML, "dists"+ "_" + Integer.toString(number), dists[x][y]) ;

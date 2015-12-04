@@ -21,17 +21,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="50dp"
-            android:background="@android:color/background_light"
             android:text="Pablo Picasso&apos;s Maze Adventure"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
             android:id="@+id/skill_level_select_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="20dp"
-            android:background="@android:color/background_light"
             android:gravity="center_horizontal"
             android:text="Select Skill Level"
             android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -40,27 +37,22 @@
             android:id="@+id/skill_select_seek_bar"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:background="@android:color/background_light" />
+            android:layout_marginBottom="10dp" />
 
         <TextView
             android:id="@+id/skill_selected"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="60dp"
             android:layout_marginTop="0dp"
-            android:background="@android:color/background_light"
             android:gravity="center_horizontal"
             android:text="@string/skill_selected" />
 
         <TextView
             android:id="@+id/maze_gen_spinner_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginBottom="10dp"
-            android:background="@android:color/background_light"
             android:gravity="center|center_horizontal"
             android:text="Select Generation Algorithm"
             android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -69,8 +61,7 @@
             android:id="@+id/maze_gen_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="40dp"
-            android:background="@android:color/background_light" />
+            android:layout_marginBottom="40dp" />
 
         <Button
             android:id="@+id/start_button"

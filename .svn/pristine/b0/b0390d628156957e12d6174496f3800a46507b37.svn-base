@@ -15,8 +15,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="52dp"
-        android:background="@android:color/background_light" />
+        android:layout_marginTop="52dp" />
 
     <Button
         android:id="@+id/play_button"
@@ -48,7 +47,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="26dp"
-        android:background="@android:color/background_light"
         android:gravity="center"
         android:text="Generating Maze"
         android:textAppearance="?android:attr/textAppearanceLarge" />
@@ -65,11 +63,9 @@
 
         <CheckBox
             android:id="@+id/visible_walls_checkbox"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:background="@android:color/background_light"
             android:text="Show Currently Visible Walls"
             android:visibility="invisible" />
 
@@ -78,7 +74,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/background_light"
             android:text="Show Maze From Top"
             android:visibility="invisible" />
 
@@ -87,10 +82,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/background_light"
             android:text="Show Way To Exit"
             android:visibility="invisible" />
-
     </LinearLayout>
 
     <TextView
@@ -107,7 +100,6 @@
         android:layout_below="@+id/progress_text_view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="36dp"
-        android:background="@android:color/background_light"
         android:gravity="center"
         android:text="Select Driver"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -120,7 +112,6 @@
         android:layout_alignLeft="@+id/driver_spinner_title"
         android:layout_below="@+id/driver_spinner_title"
         android:layout_marginTop="41dp"
-        android:background="@android:color/background_light"
         android:visibility="invisible" />
 
 </RelativeLayout>

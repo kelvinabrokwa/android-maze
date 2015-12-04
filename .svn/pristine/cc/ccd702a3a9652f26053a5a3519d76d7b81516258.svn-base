@@ -65,8 +65,9 @@ public class FinishActivity extends ActionBarActivity {
 							 Globals.root,
 							 Globals.cells,
 							 Globals.dists.dists,
-							 Globals.startx,
-							 Globals.starty);
+							 Globals.starty,
+							 Globals.startx);
+
 	}
 	
 	/**

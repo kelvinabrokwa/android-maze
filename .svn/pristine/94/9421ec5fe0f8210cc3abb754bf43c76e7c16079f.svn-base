@@ -70,26 +70,7 @@ public class GeneratingActivity extends ActionBarActivity {
 		playButton = (Button) findViewById(R.id.play_button);
 		
 		populateDriverSpinner();
-		
-		Globals.maze = new Maze();
-
-		if (!algorithm.equals(AMazeActivity.FILE)) {
-			Log.v("Option", "generating new maze");
-			build();
-		}
-		else {
-			// read file
-			Log.v("Option", "reading from file");
-			String filename = getFilesDir().toString() + "/maze_" + skill;
-			MazeFileReader reader = new MazeFileReader(filename);
-			Globals.dists = new Distance(reader.getDistances());
-			Globals.cells = reader.getCells();
-			Globals.startx = reader.getStartX();
-			Globals.starty = reader.getStartY();
-			Globals.root = reader.getRootNode();
-			Globals.maze.newMaze(Globals.root, Globals.cells, Globals.dists, Globals.startx, Globals.starty);
-			showOptions();
-		}
+		build();
 	}
 	
 	/**
@@ -178,6 +159,7 @@ public class GeneratingActivity extends ActionBarActivity {
 			}
 		});
 
+		Globals.maze = new Maze();
 		Globals.maze.newMaze(root, c, dists, startx, starty);
 	}
 	

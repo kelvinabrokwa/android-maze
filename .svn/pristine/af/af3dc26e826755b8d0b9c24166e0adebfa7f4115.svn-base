@@ -44,16 +44,11 @@ public class CuriousMouse implements RobotDriver{
 	 */
 	@Override
 	public boolean drive2Exit() throws Exception {
-		Log.v("moving", "next");
-		if (width == -1 || height == -1)
-		{
+		if (width == -1 || height == -1) {
 			throw new Exception("Did not set maze dimensions.");
 		}
-		if (needsToMove)
-		{
-			Log.v("moving forward", "ya'll");
+		if (needsToMove) {
 			move(1);//robot.move(1);
-			needsToMove = false;
 			return true;
 		}
 		Random random = new Random();
@@ -62,52 +57,33 @@ public class CuriousMouse implements RobotDriver{
 		int min;
 		Direction[] robotDirs =  { Direction.LEFT, Direction.RIGHT, Direction.FORWARD, Direction.BACKWARD };
 		Direction absDir, nextDir = null;
-		if (!robot.isAtGoal())
-		{
-			Log.v("moving", "deciding");
+		if (!robot.isAtGoal()) {
 			currPos = robot.getCurrentPosition();
 			min = Integer.MAX_VALUE;
-			for (int i = 0; i < robotDirs.length; i++)
-			{
+			for (int i = 0; i < robotDirs.length; i++) {
 				if (robot.distanceToObstacle(robotDirs[i]) == 0) continue;
 				absDir = ((BasicRobot)robot).normalizeDirection(robotDirs[i]);
 				dirArr = ((BasicRobot)robot).dirs.get(absDir);
 				nextCell = new int[] { currPos[0] + dirArr[0], currPos[1] + dirArr[1] };
-				if (getVisits(nextCell) < min)
-				{
+				if (getVisits(nextCell) < min) {
+					min = getVisits(nextCell);
+					nextDir = robotDirs[i];
+				} else if (getVisits(nextCell) == min && random.nextBoolean()) {
 					min = getVisits(nextCell);
 					nextDir = robotDirs[i];
 				}
-				else if (getVisits(nextCell) == min && random.nextBoolean())
-				{
-					min = getVisits(nextCell);
-					nextDir = robotDirs[i];
-				}
 			}
-			if (nextDir == Direction.LEFT)
-			{
-				rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
-			}
-			else if (nextDir == Direction.RIGHT)
-			{
-				rotate(Turn.RIGHT);// robot.rotate(Turn.RIGHT);
-			}
-			else if (nextDir == Direction.BACKWARD)
-			{
-				rotate(Turn.AROUND); // robot.rotate(Turn.AROUND);
-			}
+			if (nextDir == Direction.LEFT) rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
+			else if (nextDir == Direction.RIGHT) rotate(Turn.RIGHT);// robot.rotate(Turn.RIGHT);
+			else if (nextDir == Direction.BACKWARD) rotate(Turn.AROUND); // robot.rotate(Turn.AROUND);
 			needsToMove = true;
 			visited(nextCell);
 		}
-		else if (robot.isAtGoal()
-				&& robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE)
-		{
+		else if (robot.isAtGoal() && robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE) {
 			rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
 		}
 		else
-		{
 			move(1);//robot.move(1);
-		}
 		return true;
 	}
 	

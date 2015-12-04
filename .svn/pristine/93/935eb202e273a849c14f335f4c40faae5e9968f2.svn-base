@@ -1,6 +1,5 @@
 package edu.wm.cs.cs301.kelvinabrokwa.falstad;
 
-import android.util.Log;
 import edu.wm.cs.cs301.kelvinabrokwa.ui.GeneratingActivity;
 import edu.wm.cs.cs301.kelvinabrokwa.ui.Globals;
 

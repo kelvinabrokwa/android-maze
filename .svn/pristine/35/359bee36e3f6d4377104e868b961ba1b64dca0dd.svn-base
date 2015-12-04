@@ -10,7 +10,6 @@ public class Wizard implements RobotDriver {
 	Robot robot;
 	Distance dist;
 	Handler handler = new Handler();
-	boolean paused = false;
 	
 	@Override
 	public void setRobot(Robot r) {
@@ -71,7 +70,6 @@ public class Wizard implements RobotDriver {
 		}
 		return false;
 	}
-
 	private void move(int n) {
 		final int num = n;
 		handler.postDelayed(new Runnable() {
@@ -100,10 +98,6 @@ public class Wizard implements RobotDriver {
 				}
 			}
 		}, 500);
-	}
-	
-	public void togglePause() {
-		paused = !paused;
 	}
 
 	@Override

@@ -88,7 +88,6 @@ public class BasicRobot implements Robot {
 		}
 		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
 		//maze.setPathLength(pathLength);
-		playActivity.setEnergy((int)batteryLevel);
 	}
 
 	@Override
@@ -111,7 +110,6 @@ public class BasicRobot implements Robot {
 		while (distance-- != 0)
 			maze.keyDown(GWEvent.UP);
 		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
-		playActivity.setEnergy((int)batteryLevel);
 		//maze.setPathLength(pathLength);
 		if (isOutsideMaze()) {
 			//reset(false);
@@ -225,7 +223,6 @@ public class BasicRobot implements Robot {
 		}
 		batteryLevel -= 1;
 		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
-		playActivity.setEnergy((int)batteryLevel);
 		return dist;
 	}
 	
