@@ -1,12 +1,10 @@
 package edu.wm.cs.cs301.kelvinabrokwa.falstad;
 
 import java.util.Random;
-
 import android.os.Handler;
 import android.util.Log;
 import edu.wm.cs.cs301.kelvinabrokwa.falstad.Robot.Direction;
 import edu.wm.cs.cs301.kelvinabrokwa.falstad.Robot.Turn;
-import edu.wm.cs.cs301.kelvinabrokwa.ui.Globals;
 import edu.wm.cs.cs301.kelvinabrokwa.falstad.BasicRobot;
 
 public class CuriousMouse implements RobotDriver{
@@ -15,6 +13,7 @@ public class CuriousMouse implements RobotDriver{
 	Handler handler = new Handler();
 	int width = -1, height = -1;
 	int[][] visits;
+	boolean paused = false;
 	
 	@Override
 	public void setRobot(Robot r) {
@@ -43,28 +42,33 @@ public class CuriousMouse implements RobotDriver{
 	 * cell is visited. It then chooses to go to the least visited cell.
 	 */
 	@Override
-	public boolean drive2Exit() throws Exception {
-		Log.v("moving", "next");
+	public boolean drive2Exit() throws Exception
+	{
 		if (width == -1 || height == -1)
 		{
 			throw new Exception("Did not set maze dimensions.");
 		}
+		if (paused)
+		{
+			pause();
+			return true;
+		}
 		if (needsToMove)
 		{
-			Log.v("moving forward", "ya'll");
-			move(1);//robot.move(1);
+			move(1);
 			needsToMove = false;
 			return true;
 		}
+
 		Random random = new Random();
 		int[] currPos;
 		int[] dirArr, nextCell = null;
 		int min;
 		Direction[] robotDirs =  { Direction.LEFT, Direction.RIGHT, Direction.FORWARD, Direction.BACKWARD };
 		Direction absDir, nextDir = null;
+
 		if (!robot.isAtGoal())
 		{
-			Log.v("moving", "deciding");
 			currPos = robot.getCurrentPosition();
 			min = Integer.MAX_VALUE;
 			for (int i = 0; i < robotDirs.length; i++)
@@ -73,6 +77,7 @@ public class CuriousMouse implements RobotDriver{
 				absDir = ((BasicRobot)robot).normalizeDirection(robotDirs[i]);
 				dirArr = ((BasicRobot)robot).dirs.get(absDir);
 				nextCell = new int[] { currPos[0] + dirArr[0], currPos[1] + dirArr[1] };
+				
 				if (getVisits(nextCell) < min)
 				{
 					min = getVisits(nextCell);
@@ -86,27 +91,32 @@ public class CuriousMouse implements RobotDriver{
 			}
 			if (nextDir == Direction.LEFT)
 			{
-				rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
+				needsToMove = true;
+				rotate(Turn.LEFT);
 			}
 			else if (nextDir == Direction.RIGHT)
 			{
-				rotate(Turn.RIGHT);// robot.rotate(Turn.RIGHT);
+				needsToMove = true;
+				rotate(Turn.RIGHT);
 			}
 			else if (nextDir == Direction.BACKWARD)
 			{
-				rotate(Turn.AROUND); // robot.rotate(Turn.AROUND);
+				needsToMove = true;
+				rotate(Turn.AROUND);
+			} else {
+				move(1);
 			}
-			needsToMove = true;
 			visited(nextCell);
 		}
 		else if (robot.isAtGoal()
 				&& robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE)
 		{
-			rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
+			rotate(Turn.LEFT);
 		}
-		else
+		else if (robot.isAtGoal()
+				&& robot.distanceToObstacle(Direction.FORWARD) == Integer.MAX_VALUE)
 		{
-			move(1);//robot.move(1);
+			move(1);
 		}
 		return true;
 	}
@@ -141,6 +151,19 @@ public class CuriousMouse implements RobotDriver{
 		}, 500);
 	}
 	
+	private void pause() {
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					drive2Exit();
+				} catch (Exception e) {
+					Log.v("Exception", e.toString());
+				}
+			}
+		}, 200);
+	}
+
 	/**
 	 * mark increment the number of times you've visited the given cell
 	 * @param pos - position x, y
@@ -166,5 +189,10 @@ public class CuriousMouse implements RobotDriver{
 	@Override
 	public int getPathLength() {
 		return ((BasicRobot)robot).getPathLength();
+	}
+
+	@Override
+	public void togglePaused() {
+		paused = !paused;
 	}
 }

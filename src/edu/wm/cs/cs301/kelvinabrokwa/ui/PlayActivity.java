@@ -1,6 +1,7 @@
 package edu.wm.cs.cs301.kelvinabrokwa.ui;
 
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,7 +15,9 @@ import edu.wm.cs.cs301.kelvinabrokwa.falstad.Robot.Turn;
 public class PlayActivity extends ActionBarActivity {
 
 	public final static String WON = "WON",
-							   REASON = "REASON";
+							   REASON = "REASON",
+							   PATH_LENGTH = "PATH LENGTH",
+							   ENERGY_USED = "ENERGY USED";
 
 	private ProgressBar energyProgressBar;
 	private Button forward, backward, left, right, pause;
@@ -24,6 +27,7 @@ public class PlayActivity extends ActionBarActivity {
 	private Robot robot;
 	private RobotDriver driver;
 	private boolean paused = false;
+	int pathLength, energyUsed;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +50,15 @@ public class PlayActivity extends ActionBarActivity {
 		showSolution = extras.getBoolean(GeneratingActivity.SHOW_WAY_TO_EXIT);
 		showVisibleWalls = extras.getBoolean(GeneratingActivity.SHOW_VISIBLE_WALLS);
 		driverChoice = extras.getString(GeneratingActivity.DRIVER);
+		
+		if (extras.getString(AMazeActivity.ALGORITHM).equals(AMazeActivity.FILE)) {
+			((TextView)findViewById(R.id.nightmare_message)).setVisibility(View.VISIBLE);
+		}
+	
+		Log.v("show map", showMap.toString());
+		Log.v("show solution", showSolution.toString());
+		Log.v("show visible walls", showVisibleWalls.toString());
+		Log.v("robot driver", driverChoice);
 	
 		Globals.gw = (GraphicsWrapper) findViewById(R.id.graphics_wrapper);
 		maze = Globals.maze;
@@ -61,21 +74,29 @@ public class PlayActivity extends ActionBarActivity {
 	 * display either control buttons or a pause button based on the driver type
 	 */
 	public void showButton() {
-		if (driverChoice.equals(GeneratingActivity.MANUAL_DRIVER)) {
+		if (driverChoice.equals(GeneratingActivity.MANUAL_DRIVER))
+		{
 			driver = new ManualDriver();
 			// show controls
 			forward.setVisibility(View.VISIBLE);
 			backward.setVisibility(View.VISIBLE);
 			left.setVisibility(View.VISIBLE);
 			right.setVisibility(View.VISIBLE);
-		} else {
-			if (driverChoice.equals(GeneratingActivity.CURIOUS_MOUSE)) {
+		}
+		else
+		{
+			if (driverChoice.equals(GeneratingActivity.CURIOUS_MOUSE))
+			{
 				driver = new CuriousMouse();
-			} else if (driverChoice.equals(GeneratingActivity.WIZARD)) {
+			}
+			else if (driverChoice.equals(GeneratingActivity.WIZARD))
+			{
 				driver = new Wizard();
 			}
 			else if (driverChoice.equals(GeneratingActivity.WALL_FOLLOWER))
+			{
 				driver = new WallFollower();
+			}
 			// show play/pause button
 			pause.setVisibility(View.VISIBLE);
 		}
@@ -88,7 +109,7 @@ public class PlayActivity extends ActionBarActivity {
 		try {
 			driver.drive2Exit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.v("Exception", e.toString());
 		}
 	}
 	
@@ -98,6 +119,11 @@ public class PlayActivity extends ActionBarActivity {
 	 */
 	public void setEnergy(int energy) {
 		energyProgressBar.setProgress(energy);
+		energyUsed = (int)BasicRobot.INITIAL_BATTERY_LEVEL - energy;
+	}
+	
+	public void setPathLength(int l) {
+		pathLength = l;
 	}
 	
 	/**
@@ -105,6 +131,7 @@ public class PlayActivity extends ActionBarActivity {
 	 * @param v
 	 */
 	public void onForward(View v) {
+		Log.v("Move", "forward");
 		((ManualDriver) driver).move();
 	}
 	/**
@@ -112,6 +139,7 @@ public class PlayActivity extends ActionBarActivity {
 	 * @param v
 	 */
 	public void onBackward(View v) {
+		Log.v("Move", "back");
 		((ManualDriver) driver).rotate(Turn.AROUND);
 		((ManualDriver) driver).move();
 	}
@@ -120,6 +148,7 @@ public class PlayActivity extends ActionBarActivity {
 	 * @param v
 	 */
 	public void onLeft(View v) {
+		Log.v("Move", "left");
 		((ManualDriver) driver).rotate(Turn.LEFT);
 	}
 	/**
@@ -127,6 +156,7 @@ public class PlayActivity extends ActionBarActivity {
 	 * @param v
 	 */
 	public void onRight(View v) {
+		Log.v("Move", "right");
 		((ManualDriver) driver).rotate(Turn.RIGHT);
 	}
 	/**
@@ -134,7 +164,9 @@ public class PlayActivity extends ActionBarActivity {
 	 * @param v
 	 */
 	public void onPause(View v) {
+		Log.v("Pause button", "toggled");
 		pause.setText((paused = !paused) ? "Play" : "Pause");
+		driver.togglePaused();
 	}
 	/**
 	 * back button leads to initial activity
@@ -151,12 +183,16 @@ public class PlayActivity extends ActionBarActivity {
 	}
 	public void win() {
 		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(PATH_LENGTH, pathLength);
+		i.putExtra(ENERGY_USED, energyUsed);
 		i.putExtra(WON, true);
 		i.putExtra(REASON, "");
 		startActivity(i);
 	}
 	public void lose(String reason) {
 		Intent i = new Intent(this, FinishActivity.class);
+		i.putExtra(PATH_LENGTH, pathLength);
+		i.putExtra(ENERGY_USED, energyUsed);
 		i.putExtra(WON, false);
 		i.putExtra(REASON, reason);
 		startActivity(i);
@@ -181,7 +217,7 @@ public class PlayActivity extends ActionBarActivity {
 		if (id == R.id.action_settings) {
 			return true;
 		}
-		
+	
 		item.setChecked(!item.isChecked());
 
 		if (item.toString().equals("Show Map"))
@@ -191,6 +227,7 @@ public class PlayActivity extends ActionBarActivity {
 		else if (item.toString().equals("Show Visible Walls"))
 			maze.setShowMazeMode(item.isChecked());
 
+		Log.v("Overlay Map", "toggled");
 		return super.onOptionsItemSelected(item);
 	}
 }

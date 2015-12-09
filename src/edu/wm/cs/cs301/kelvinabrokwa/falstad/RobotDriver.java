@@ -47,7 +47,10 @@ public interface RobotDriver {
 	 * the starting position and its energy level at the exit position. 
 	 * This is used as a measure of efficiency for a robot driver.
 	 */
+	
 	float getEnergyConsumption() ;
+
+	public void togglePaused();
 	
 	/**
 	 * Returns the total length of the journey in number of cells traversed. 

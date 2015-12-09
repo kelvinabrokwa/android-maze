@@ -10,6 +10,7 @@ public class Wizard implements RobotDriver {
 	Robot robot;
 	Distance dist;
 	Handler handler = new Handler();
+	boolean needToMove = false;
 	boolean paused = false;
 	
 	@Override
@@ -18,9 +19,7 @@ public class Wizard implements RobotDriver {
 	}
 
 	@Override
-	public void setDimensions(int width, int height) {
-		//
-	}
+	public void setDimensions(int width, int height) { }
 
 	@Override
 	public void setDistance(Distance distance) {
@@ -35,6 +34,15 @@ public class Wizard implements RobotDriver {
 	 */
 	@Override
 	public boolean drive2Exit() throws Exception {
+		if (paused) {
+			pause();
+			return true;
+		}
+		if (needToMove) {
+			move(1);
+			needToMove = false;
+			return true;
+		}
 		int min;
 		int[] currPos, dirArr, nextCell = null;
 		Direction absDir, nextDir = null;
@@ -53,13 +61,24 @@ public class Wizard implements RobotDriver {
 				}
 			}
 			if (nextDir == Direction.LEFT)
+			{
 				rotate(Turn.LEFT);
+				needToMove = true;
+			}
 			else if (nextDir == Direction.RIGHT)
+			{
 				rotate(Turn.RIGHT);
+				needToMove = true;
+			}
 			else if (nextDir == Direction.BACKWARD)
-				rotate(Turn.AROUND);//robot.rotate(Turn.AROUND);
+			{
+				rotate(Turn.AROUND);
+				needToMove = true;
+			}
 			else
+			{
 				move(1);
+			}
 		}
 		else if (robot.isAtGoal()
 				&& robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE) {
@@ -102,8 +121,17 @@ public class Wizard implements RobotDriver {
 		}, 500);
 	}
 	
-	public void togglePause() {
-		paused = !paused;
+	private void pause() {
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					drive2Exit();
+				} catch (Exception e) {
+					Log.v("Exception", e.toString());
+				}
+			}
+		}, 200);
 	}
 
 	@Override
@@ -114,6 +142,11 @@ public class Wizard implements RobotDriver {
 	@Override
 	public int getPathLength() {
 		return ((BasicRobot)robot).getPathLength();
+	}
+
+	@Override
+	public void togglePaused() {
+		paused = !paused;
 	}
 
 }

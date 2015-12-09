@@ -1,6 +1,5 @@
 package edu.wm.cs.cs301.kelvinabrokwa.falstad;
 
-import android.view.Display;
 import android.view.View;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -10,7 +9,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Handler;
 import android.util.AttributeSet;
 
 public class GraphicsWrapper extends View {
@@ -18,7 +16,6 @@ public class GraphicsWrapper extends View {
 	private Canvas canvas;
 	private Paint paint;
 	private Bitmap bitmap;
-	private Handler handler = new Handler();
 	
 	public GraphicsWrapper(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -55,7 +52,7 @@ public class GraphicsWrapper extends View {
 		}
 		public GWColor(int rgb) {
 			super();
-			RGB = rgb;
+			RGB =  0xff000000 | rgb;
 		}
 		public int getR() { return r; }
 		public int getG() { return g; }

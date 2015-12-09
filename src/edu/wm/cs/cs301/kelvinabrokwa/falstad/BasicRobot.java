@@ -36,7 +36,7 @@ public class BasicRobot implements Robot {
 
 	final int ENERGY_FOR_ROTATION = 3;
 	final int ENERGY_FOR_STEP = 5;
-	final float INITIAL_BATTERY_LEVEL = 2500;
+	public final static float INITIAL_BATTERY_LEVEL = 2500;
 	float batteryLevel = INITIAL_BATTERY_LEVEL;
 	Maze maze;
 	int pathLength = 0;
@@ -66,7 +66,6 @@ public class BasicRobot implements Robot {
 		if (((turn == Turn.LEFT || turn == Turn.RIGHT) && batteryLevel < ENERGY_FOR_ROTATION) ||
 				(turn == Turn.AROUND && batteryLevel < ENERGY_FOR_ROTATION * 2)) {
 			stopped = true;
-			//reset(true);
 			endGame(false, BATTERY_FAILURE_MESSAGE);
 			throw new Exception("Not enough energy to rotate");
 		}
@@ -86,9 +85,8 @@ public class BasicRobot implements Robot {
 			batteryLevel -= ENERGY_FOR_ROTATION * 2;
 			break;
 		}
-		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
-		//maze.setPathLength(pathLength);
 		playActivity.setEnergy((int)batteryLevel);
+		playActivity.setPathLength(pathLength);
 	}
 
 	@Override
@@ -96,13 +94,11 @@ public class BasicRobot implements Robot {
 		batteryLevel++; // distanceToObstacle uses one energy
 		if (batteryLevel < ENERGY_FOR_STEP * distance) {
 			stopped = true;
-			//reset(true);
 			endGame(false, BATTERY_FAILURE_MESSAGE);
 			throw new Exception("not enough energy to perform task");
 		}
 		if (distanceToObstacle(Direction.FORWARD) < distance) {
 			stopped = true;
-			//reset(true);
 			endGame(false, WALL_FAILURE_MESSAGE);
 			throw new Exception("trying to walk through a wall");
 		}
@@ -113,6 +109,7 @@ public class BasicRobot implements Robot {
 		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
 		playActivity.setEnergy((int)batteryLevel);
 		//maze.setPathLength(pathLength);
+		playActivity.setPathLength(pathLength);
 		if (isOutsideMaze()) {
 			//reset(false);
 			endGame(true);
@@ -129,8 +126,6 @@ public class BasicRobot implements Robot {
 	@Override
 	public void setMaze(Maze m) {
 		maze = m;
-		//maze.setBatteryUsed(0);
-		//maze.setPathLength(0);
 	}
 
 	@Override
@@ -224,7 +219,6 @@ public class BasicRobot implements Robot {
 				dist++;
 		}
 		batteryLevel -= 1;
-		//maze.setBatteryUsed(INITIAL_BATTERY_LEVEL - batteryLevel);
 		playActivity.setEnergy((int)batteryLevel);
 		return dist;
 	}
@@ -306,16 +300,7 @@ public class BasicRobot implements Robot {
 	public boolean isOutsideMaze(int[] pos) {
 		return pos[0] < 0 || pos[0] >= maze.mazew || pos[1] < 0 || pos[1] >= maze.mazeh;
 	}
-	
-	/**
-	 * This method is called at the end of every game. It resets the internals of the robot
-	 * and tells the maze what information to add final screen.
-	 * @param lost - whether or not the player lost
-	 */
-	//public void reset(boolean lost) {
-		//if (lost) maze.setSuccess(false);
-		//maze.setState(Constants.STATE_FINISH); // end the game
-	//}
+
 	public void endGame(boolean won) {
 		playActivity.end(pathLength, (int)(INITIAL_BATTERY_LEVEL - batteryLevel));
 	}

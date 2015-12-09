@@ -58,7 +58,6 @@ public class Seg {
 	}
 	
 	void storeSeg(Document doc, Element mazeXML, int number, int i) {
-		Log.v("rgb value", ""+col.getRGB());
 		MazeFileWriter.appendChild(doc, mazeXML, "distSeg_" + number+ "_" + i, dist) ;
 		MazeFileWriter.appendChild(doc, mazeXML, "dxSeg_" + number+ "_" + i, dx) ;
 		MazeFileWriter.appendChild(doc, mazeXML, "dySeg_" + number+ "_" + i, dy) ;

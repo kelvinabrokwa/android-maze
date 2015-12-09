@@ -21,6 +21,7 @@ public class FinishActivity extends ActionBarActivity {
 
 	private boolean won;
 	private String reason;
+	private int pl, eu;
 	
 	private TextView message, lossReason, pathLength, energyUsed;
 
@@ -32,12 +33,15 @@ public class FinishActivity extends ActionBarActivity {
 		Bundle extras = getIntent().getExtras();
 		won = extras.getBoolean(PlayActivity.WON);
 		reason = extras.getString(PlayActivity.REASON);
+		pl = extras.getInt(PlayActivity.PATH_LENGTH);
+		eu = extras.getInt(PlayActivity.ENERGY_USED);
 		
 		message = (TextView) findViewById(R.id.won_message);
 		lossReason = (TextView) findViewById(R.id.loss_reason);
 		pathLength = (TextView) findViewById(R.id.path_length);
 		energyUsed = (TextView) findViewById(R.id.energy_used);
 		
+		Log.v("game over", won ? "won" : "lost");
 		setText();
 	}
 	
@@ -47,8 +51,8 @@ public class FinishActivity extends ActionBarActivity {
 	private void setText() {
 		message.setText(won ? "You won!" : "You Lost!");
 		lossReason.setText(reason);
-		pathLength.setText("Path Length: " + 0);
-		energyUsed.setText("Energy Used: " + 0);
+		pathLength.setText("Path Length: " + pl);
+		energyUsed.setText("Energy Used: " + eu);
 	}
 	
 	/**

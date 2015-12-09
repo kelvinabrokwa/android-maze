@@ -1,6 +1,7 @@
 package edu.wm.cs.cs301.kelvinabrokwa.ui;
 
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 import java.util.*;
 
@@ -67,6 +68,7 @@ public class AMazeActivity extends ActionBarActivity {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 				skillSelected.setText(Integer.toString(progress));
+				Log.v("skill change", ""+progress);
 			}
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {}

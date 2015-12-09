@@ -66,4 +66,10 @@ public class ManualDriver implements RobotDriver {
 		}
 	}
 
+	@Override
+	public void togglePaused() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

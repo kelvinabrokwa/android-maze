@@ -3,6 +3,7 @@ package edu.wm.cs.cs301.kelvinabrokwa.ui;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class GeneratingActivity extends ActionBarActivity {
 	private CheckBox showMazeFromTop;
 	private CheckBox showWayToExit;
 	private Button playButton;
+	Intent i;
 
 	private Handler handler = new Handler();
 	
@@ -56,6 +58,11 @@ public class GeneratingActivity extends ActionBarActivity {
 		Bundle extras = getIntent().getExtras();
 		skill = extras.getInt(AMazeActivity.SKILL);
 		algorithm = extras.getString(AMazeActivity.ALGORITHM);
+		i = new Intent(this, PlayActivity.class);
+		i.putExtra(AMazeActivity.ALGORITHM, algorithm);
+		
+		Log.v("skill", ""+skill);
+		Log.v("generation algorithm", algorithm);
 		
 		Globals.skill = skill;
 		
@@ -73,21 +80,33 @@ public class GeneratingActivity extends ActionBarActivity {
 		
 		Globals.maze = new Maze();
 
-		if (!algorithm.equals(AMazeActivity.FILE)) {
+		if (!algorithm.equals(AMazeActivity.FILE))
+		{
 			Log.v("Option", "generating new maze");
 			build();
 		}
-		else {
+		else
+		{
 			// read file
-			Log.v("Option", "reading from file");
 			String filename = getFilesDir().toString() + "/maze_" + skill;
-			MazeFileReader reader = new MazeFileReader(filename);
-			Globals.dists = new Distance(reader.getDistances());
-			Globals.cells = reader.getCells();
-			Globals.startx = reader.getStartX();
-			Globals.starty = reader.getStartY();
-			Globals.root = reader.getRootNode();
-			Globals.maze.newMaze(Globals.root, Globals.cells, Globals.dists, Globals.startx, Globals.starty);
+			File tmp = new File(filename);
+			if (!tmp.exists()) 
+			{
+				Log.v("Load maze", "No saved maze for skill level, building new maze");
+				i.putExtra(AMazeActivity.ALGORITHM, "None");
+				build();
+			}
+			else
+			{
+				Log.v("Option", "reading from file");
+				MazeFileReader reader = new MazeFileReader(filename);
+				Globals.dists = new Distance(reader.getDistances());
+				Globals.cells = reader.getCells();
+				Globals.startx = reader.getStartX();
+				Globals.starty = reader.getStartY();
+				Globals.root = reader.getRootNode();
+				Globals.maze.newMaze(Globals.root, Globals.cells, Globals.dists, Globals.startx, Globals.starty);
+			}
 			showOptions();
 		}
 	}
@@ -135,7 +154,6 @@ public class GeneratingActivity extends ActionBarActivity {
 	 * @param view
 	 */
 	public void moveToPlayActivity(View view) {
-		Intent i = new Intent(this, PlayActivity.class);
 		i.putExtra(DRIVER, driverSpinner.getSelectedItem().toString());
 		i.putExtra(SHOW_MAZE_FROM_TOP, showMazeFromTop.isChecked());
 		i.putExtra(SHOW_WAY_TO_EXIT, showWayToExit.isChecked());
@@ -163,7 +181,13 @@ public class GeneratingActivity extends ActionBarActivity {
 	}
 	
 	public void build() {
-		mazebuilder = new MazeBuilder();
+		if (algorithm.equals(AMazeActivity.ELLER)) {
+			mazebuilder = new MazeBuilderEller();
+		} else if (algorithm.equals(AMazeActivity.PRIM)) {
+			mazebuilder = new MazeBuilderPrim();
+		} else {
+			mazebuilder = new MazeBuilder();
+		}
 		mazew = Constants.SKILL_X[skill];
 		mazeh = Constants.SKILL_Y[skill];
 		mazebuilder.build(this, mazew, mazeh, Constants.SKILL_ROOMS[skill], Constants.SKILL_PARTCT[skill]);
@@ -177,7 +201,7 @@ public class GeneratingActivity extends ActionBarActivity {
 				showOptions();
 			}
 		});
-
+		Log.v("maze builder", "generation completed");
 		Globals.maze.newMaze(root, c, dists, startx, starty);
 	}
 	

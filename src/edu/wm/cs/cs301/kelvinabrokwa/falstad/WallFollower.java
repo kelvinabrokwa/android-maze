@@ -9,6 +9,7 @@ public class WallFollower implements RobotDriver {
 
 	Robot robot;
 	Handler handler = new Handler();
+	boolean paused = false;
 	
 	@Override
 	public void setRobot(Robot r) {
@@ -35,40 +36,42 @@ public class WallFollower implements RobotDriver {
 	 */
 	@Override
 	public boolean drive2Exit() throws Exception {
-		//while (!hasExited() && !robot.isAtGoal()) {
+		if (paused) {
+			pause();
+			return true;
+		}
 		if (!hasExited() && !robot.isAtGoal()) {
-			//while (robot.distanceToObstacle(Direction.LEFT) > 0 && !hasExited()) {
 			if (needsToMove)
 			{
 				move(1);
 				needsToMove = false;
+				return true;
 			}
-			else if (robot.distanceToObstacle(Direction.LEFT) > 0 && !hasExited())
+			if (robot.distanceToObstacle(Direction.LEFT) > 0 && !hasExited())
 			{
-				rotate(Turn.LEFT);//robot.rotate(Turn.LEFT);
+				rotate(Turn.LEFT);
 				needsToMove = true;
-				//move(1);//robot.move(1);
+				return true;
 			}
-			//while (robot.distanceToObstacle(Direction.FORWARD) == 0) {
 			if (robot.distanceToObstacle(Direction.FORWARD) == 0)
 			{
-				rotate(Turn.RIGHT);//robot.rotate(Turn.RIGHT);
+				rotate(Turn.RIGHT);
+				return true;
 			}
-			else if (robot.distanceToObstacle(Direction.FORWARD) > 0 && !hasExited())
+			if (robot.distanceToObstacle(Direction.FORWARD) > 0 && !hasExited())
 			{
-				move(1);//robot.move(1);
+				move(1);
 			}
 		}
-		else if (!hasExited()) {
-			//while (robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE) {
+		else if (!hasExited() && robot.isAtGoal()) {
 			if (robot.distanceToObstacle(Direction.FORWARD) != Integer.MAX_VALUE)
 			{
-				//robot.rotate(Turn.LEFT);
 				rotate(Turn.LEFT);
+				return true;
 			}
 			else if (robot.distanceToObstacle(Direction.FORWARD) == Integer.MAX_VALUE)
 			{
-				move(1);//robot.move(1);
+				move(1);
 			}
 		}
 		return true;
@@ -103,6 +106,19 @@ public class WallFollower implements RobotDriver {
 			}
 		}, 500);
 	}
+
+	private void pause() {
+		handler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					drive2Exit();
+				} catch (Exception e) {
+					Log.v("Exception", e.toString());
+				}
+			}
+		}, 200);
+	}
 	
 	private boolean hasExited() {
 		Maze maze = ((BasicRobot)robot).getMaze();
@@ -118,6 +134,11 @@ public class WallFollower implements RobotDriver {
 	@Override
 	public int getPathLength() {
 		return ((BasicRobot) robot).getPathLength();
+	}
+
+	@Override
+	public void togglePaused() {
+		paused = !paused;
 	}
 
 }
